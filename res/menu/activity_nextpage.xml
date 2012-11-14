@@ -3,5 +3,5 @@
         android:title="@string/menu_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
-    <item android:id="@+id/item1" android:title="烦死扥死的"></item>
+    <item android:id="@+id/item1" android:title="烦死扥" android:visible="true"></item>
 </menu>
