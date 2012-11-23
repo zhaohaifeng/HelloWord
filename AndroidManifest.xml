@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name=".StartActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,12 +22,16 @@
         </activity>
         <activity
             android:name=".NextpageActivity"
-            android:label="@string/title_activity_nextpage" >
+            android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- 能否在launcher中显示 -->
+<!--  <category android:name="android.intent.category.LAUNCHER" /> -->
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainMenuActivity"
+            android:label="@string/title_activity_main_menu" >
         </activity>
     </application>
 
