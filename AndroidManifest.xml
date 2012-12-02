@@ -33,6 +33,10 @@
             android:name=".MainMenuActivity"
             android:label="@string/title_activity_main_menu" >
         </activity>
+        <activity
+            android:name=".Level1Activity"
+            android:label="@string/title_activity_main_menu" >
+        </activity>
     </application>
 
 </manifest>

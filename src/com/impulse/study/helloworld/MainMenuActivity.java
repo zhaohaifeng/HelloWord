@@ -8,6 +8,8 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.modifier.ScaleAtModifier;
+import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
 import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
@@ -27,7 +29,9 @@ import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.BitmapFactory.Options;
 import android.view.KeyEvent;
@@ -47,7 +51,7 @@ public class MainMenuActivity extends BaseGameActivity implements
 	protected static final int MENU_HELP = MENU_OPTIONS + 1;
 
 	protected Camera mCamera;
-	protected Scene mManinScene;
+	protected Scene mMainScene;
 
 	private Texture mMenuBackTexture;
 	private TextureRegion mMenuBackTextureRegion;
@@ -64,8 +68,11 @@ public class MainMenuActivity extends BaseGameActivity implements
 	protected TextureRegion mMenuOptionsTextureRegion;
 	protected TextureRegion mMenuHelpTextureRegion;
 	private boolean popupDisplayed;
+	
+	protected Handler mHandler;
 
 	public Engine onLoadEngine() {
+		mHandler = new Handler();
 		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
 				new FillResolutionPolicy(),
@@ -100,6 +107,11 @@ public class MainMenuActivity extends BaseGameActivity implements
 		this.mEngine.getTextureManager().loadTexture(this.mPopUpTexture);
 		popupDisplayed = false;
 	}
+	
+	public void onResumeGame(){
+		super.onResumeGame();
+		mMainScene.registerEntityModifier(new ScaleAtModifier(0.5f, 0.0f, 1.0f, CAMERA_WIDTH/2, CAMERA_HEIGHT/2));
+	}
 
 	public Scene onLoadScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
@@ -112,13 +124,13 @@ public class MainMenuActivity extends BaseGameActivity implements
 		final int centerY = (CAMERA_HEIGHT - this.mMenuBackTextureRegion
 				.getHeight()) / 2;
 
-		this.mManinScene = new Scene(1);
+		this.mMainScene = new Scene(1);
 
 		final Sprite menuBack = new Sprite(centerX, centerY,
 				this.mMenuBackTextureRegion);
-		mManinScene.getLastChild().attachChild(menuBack);
-		mManinScene.setChildScene(mStaticMenuScene);
-		return this.mManinScene;
+		mMainScene.getLastChild().attachChild(menuBack);
+		mMainScene.setChildScene(mStaticMenuScene);
+		return this.mMainScene;
 	}
 
 	public void onLoadComplete() {
@@ -132,10 +144,10 @@ public class MainMenuActivity extends BaseGameActivity implements
 				&& pEvent.getAction() == KeyEvent.ACTION_DOWN) {
 			if (popupDisplayed) {
 				this.mPopUpMenuScene.back();
-				mManinScene.setChildScene(mStaticMenuScene);
+				mMainScene.setChildScene(mStaticMenuScene);
 				popupDisplayed = false;
 			} else {
-				this.mManinScene.setChildScene(this.mPopUpMenuScene, false,
+				this.mMainScene.setChildScene(this.mPopUpMenuScene, false,
 						true, true);
 				popupDisplayed = true;
 			}
@@ -146,7 +158,8 @@ public class MainMenuActivity extends BaseGameActivity implements
 	}
 
 	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
-			float pMenuItemLocalX, float pMenuItemLocalY) {
+			final float pMenuItemLocalX,final float pMenuItemLocalY) {
+		
 		switch (pMenuItem.getID()) {
 		case MENU_ABOUT:
 			Toast.makeText(MainMenuActivity.this, "Abount selected",
@@ -156,14 +169,21 @@ public class MainMenuActivity extends BaseGameActivity implements
 			this.finish();
 			return true;
 		case MENU_PLAY:
-			Toast.makeText(MainMenuActivity.this, "Play selected",
-					Toast.LENGTH_SHORT).show();
+//			Toast.makeText(MainMenuActivity.this, "Play selected",
+//					Toast.LENGTH_SHORT).show();
+			mMainScene.registerEntityModifier(new ScaleModifier(1.0f,1.0f,0.0f));
+			mHandler.postDelayed(mLaunchLevel1Task, 1000);
 			return true;
 		case MENU_SCORES:
 			Toast.makeText(MainMenuActivity.this, "Scores selected",
 					Toast.LENGTH_SHORT).show();
 			return true;
 		case MENU_OPTIONS:
+			
+//			mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+//			mStaticMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+//			mHandler.postDelayed(mLaunchOptionsTask, 1000);
+			
 			Toast.makeText(this, "Options selected", Toast.LENGTH_SHORT).show();
 			return true;
 		case MENU_HELP:
@@ -233,4 +253,11 @@ public class MainMenuActivity extends BaseGameActivity implements
 		this.mPopUpMenuScene.setOnMenuItemClickListener(this);
 
 	}
+	
+	private Runnable mLaunchLevel1Task = new Runnable(){
+		public void run(){
+			Intent myIntent = new Intent(MainMenuActivity.this,Level1Activity.class);
+			MainMenuActivity.this.startActivity(myIntent);
+		}
+	};
 }
