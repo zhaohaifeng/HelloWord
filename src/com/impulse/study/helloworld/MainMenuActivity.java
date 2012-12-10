@@ -180,11 +180,11 @@ public class MainMenuActivity extends BaseGameActivity implements
 			return true;
 		case MENU_OPTIONS:
 			
-//			mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
-//			mStaticMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
-//			mHandler.postDelayed(mLaunchOptionsTask, 1000);
+			mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+			mStaticMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+			mHandler.postDelayed(mLaunchOptionsTask, 1000);
 			
-			Toast.makeText(this, "Options selected", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, "Options selected", Toast.LENGTH_SHORT).show();
 			return true;
 		case MENU_HELP:
 			Toast.makeText(this, "Help selected", Toast.LENGTH_SHORT).show();
@@ -257,6 +257,14 @@ public class MainMenuActivity extends BaseGameActivity implements
 	private Runnable mLaunchLevel1Task = new Runnable(){
 		public void run(){
 			Intent myIntent = new Intent(MainMenuActivity.this,Level1Activity.class);
+			MainMenuActivity.this.startActivity(myIntent);
+		}
+	};
+	
+	private Runnable mLaunchOptionsTask = new Runnable() {
+		
+		public void run() {
+			Intent myIntent = new Intent(MainMenuActivity.this,OptionsActivity.class);
 			MainMenuActivity.this.startActivity(myIntent);
 		}
 	};

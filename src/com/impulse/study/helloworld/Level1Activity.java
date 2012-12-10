@@ -91,7 +91,7 @@ public class Level1Activity extends BaseGameActivity {
 		mLevel1BackTexture = new Texture(512, 512,
 				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		mLevel1BackTextureRegion = TextureRegionFactory.createFromAsset(
-				this.mLevel1BackTexture, this, "Level1Bk.jpg", 0, 0);
+				this.mLevel1BackTexture, this, "Level1Bk.png", 0, 0);
 		mEngine.getTextureManager().loadTexture(this.mLevel1BackTexture);
 
 		mObstacleBoxTexture = new BuildableTexture(512, 256,
