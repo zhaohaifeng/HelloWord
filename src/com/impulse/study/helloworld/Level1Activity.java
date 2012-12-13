@@ -23,6 +23,7 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.BuildableTexture;
 import org.anddev.andengine.opengl.texture.Texture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
@@ -35,6 +36,7 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
 
 import android.os.Handler;
+import android.widget.Toast;
 
 /**
  * @author zhaohaifeng
@@ -140,7 +142,24 @@ public class Level1Activity extends BaseGameActivity {
 				mBoxTextureRegion.getHeight() + 50f, mBoxTextureRegion);
 		scene.getLastChild().attachChild(obstacleBox);
 		final Sprite bullet = new Sprite(20.0f, CAMERA_HEIGHT - 50f,
-				mBulletTextureRegion);
+				mBulletTextureRegion){
+			@Override
+			//pTouchAreaLocalX，pTouchAreaLocalY在这个sprite中的相当位置（左上角为（0，0））
+			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,final float pTouchAreaLocalX,final float pTouchAreaLocalY){
+				switch(pAreaTouchEvent.getAction()){
+				case TouchEvent.ACTION_DOWN:
+					Toast.makeText(Level1Activity.this, "Sprite touch Down", Toast.LENGTH_SHORT).show();
+					break;
+				case TouchEvent.ACTION_UP:
+					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
+					break;
+				case TouchEvent.ACTION_MOVE:
+					this.setPosition(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
+					break;
+				}
+				return true;
+			}
+		};
 		bullet.registerEntityModifier(new SequenceEntityModifier(
 				new ParallelEntityModifier(new MoveYModifier(3, 0f,
 						CAMERA_HEIGHT - 100f, EaseQuadOut.getInstance()),
@@ -148,7 +167,23 @@ public class Level1Activity extends BaseGameActivity {
 								0.5f, 1.0f), new RotationModifier(3, 0, 360))));
 		scene.getLastChild().attachChild(bullet);
 		final Sprite cross = new Sprite(bullet.getInitialX() + 50f,
-				CAMERA_HEIGHT - 100.0f, mCrossTextureRegion);
+				CAMERA_HEIGHT - 100.0f, mCrossTextureRegion){
+			@Override
+			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,final float pTouchAreaLocalX,final float pTouchAreaLocalY){
+				switch(pAreaTouchEvent.getAction()){
+				case TouchEvent.ACTION_DOWN:
+					Toast.makeText(Level1Activity.this, "Sprite touch Down", Toast.LENGTH_SHORT).show();
+					break;
+				case TouchEvent.ACTION_UP:
+					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
+					break;
+				case TouchEvent.ACTION_MOVE:
+					this.setPosition(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
+					break;
+				}
+				return true;
+			}
+		};
 		cross.registerEntityModifier(new SequenceEntityModifier(
 				new ParallelEntityModifier(new MoveYModifier(4, 0.0f,
 						CAMERA_HEIGHT - 100.0f, EaseQuadOut.getInstance()),
@@ -157,15 +192,37 @@ public class Level1Activity extends BaseGameActivity {
 		cross.registerEntityModifier(new AlphaModifier(10.0f, 0.0f, 1.0f));
 		scene.getLastChild().attachChild(cross);
 		final Sprite hatchet = new Sprite(cross.getInitialX() + 50.0f,
-				CAMERA_HEIGHT - 100.0f, mHatchetTextureRegion);
+				CAMERA_HEIGHT - 100.0f, mHatchetTextureRegion){
+			@Override
+			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,final float pTouchAreaLocalX,final float pTouchAreaLocalY){
+				switch(pAreaTouchEvent.getAction()){
+				case TouchEvent.ACTION_DOWN:
+					Toast.makeText(Level1Activity.this, "Sprite touch Down", Toast.LENGTH_SHORT).show();
+					break;
+				case TouchEvent.ACTION_UP:
+					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
+					break;
+				case TouchEvent.ACTION_MOVE:
+					this.setPosition(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
+					break;
+				}
+				return true;
+			}
+		};
 		hatchet.registerEntityModifier(new SequenceEntityModifier(
 				new ParallelEntityModifier(new MoveYModifier(5, 0.0f,
 						CAMERA_HEIGHT - 100.0f, EaseQuadOut.getInstance()),
 						new AlphaModifier(5, 0.0f, 1.0f), new ScaleModifier(5,
 								0.5f, 1.0f)), new RotationModifier(2, 0, 360)));
-		hatchet.registerEntityModifier(new AlphaModifier(15f, 0.0f, 1.0f));
+		//hatchet.registerEntityModifier(new AlphaModifier(15f, 0.0f, 1.0f));
 		scene.getLastChild().attachChild(hatchet);
 		scene.registerEntityModifier(new AlphaModifier(10, 0.0f, 1.0f));
+		
+		//注册触摸事件
+		scene.setTouchAreaBindingEnabled(true);
+		scene.registerTouchArea(bullet);
+		scene.registerTouchArea(cross);
+		scene.registerTouchArea(hatchet);
 
 		nVamp = 0;
 		mHandler.postDelayed(mStartVamp, 5000);
