@@ -154,7 +154,7 @@ public class Level1Activity extends BaseGameActivity {
 					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_MOVE:
-					this.setPosition(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
+					this.setPosition(pAreaTouchEvent.getX()-this.getWidth()/2, pAreaTouchEvent.getY()-this.getHeight()/2);
 					break;
 				}
 				return true;
@@ -178,7 +178,7 @@ public class Level1Activity extends BaseGameActivity {
 					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_MOVE:
-					this.setPosition(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
+					this.setPosition(pAreaTouchEvent.getX()-this.getWidth()/2, pAreaTouchEvent.getY()-this.getHeight()/2);
 					break;
 				}
 				return true;
@@ -203,7 +203,7 @@ public class Level1Activity extends BaseGameActivity {
 					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_MOVE:
-					this.setPosition(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
+					this.setPosition(pAreaTouchEvent.getX()-this.getWidth()/2, pAreaTouchEvent.getY()-this.getHeight()/2);
 					break;
 				}
 				return true;
