@@ -33,6 +33,10 @@
             android:name=".OptionsActivity"
             android:label="@string/title_activity_main_menu" >
         </activity>
+        <activity
+            android:name=".WAVAcitivity"
+            android:label="@string/title_activity_main_menu" >
+        </activity>
     </application>
 
 </manifest>

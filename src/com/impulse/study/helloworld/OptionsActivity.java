@@ -11,6 +11,7 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
 import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
@@ -27,6 +28,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 
@@ -42,6 +44,7 @@ public class OptionsActivity extends BaseGameActivity implements
 
 	protected static final int MENU_MUSIC = 0;
 	protected static final int MENU_EFFECTS = MENU_MUSIC + 1;
+	protected static final int MENU_WAV = MENU_EFFECTS +1;
 
 	protected Camera mCamera;
 
@@ -54,8 +57,12 @@ public class OptionsActivity extends BaseGameActivity implements
 	protected MenuScene mOptionsMenuScene;
 	private TextMenuItem mTurnMusicOff, mTurnMusicOn;
 	private TextMenuItem mTurnEffectsOff, mTurnEffectsOn;
+	
+	private TextMenuItem mWAV;
+	
 	private IMenuItem musicMenuItem;
 	private IMenuItem effectsMenuItem;
+	private IMenuItem WAVMenuItem;
 
 	private Texture mFontTexture;
 	private Font mFont;
@@ -104,6 +111,8 @@ public class OptionsActivity extends BaseGameActivity implements
 				"Turn Effects On");
 		mTurnEffectsOff = new TextMenuItem(MENU_EFFECTS, mFont,
 				"Turn Effects Off");
+		
+		mWAV = new TextMenuItem(MENU_WAV, mFont, "What a Vampire");
 	}
 
 	/*
@@ -170,6 +179,11 @@ public class OptionsActivity extends BaseGameActivity implements
 			mMainScene.clearChildScene();
 			mMainScene.setChildScene(mOptionsMenuScene);
 			return true;
+		case MENU_WAV:
+			mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0f));
+			mOptionsMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0f));
+			mHandler.postDelayed(mLaunchWAVTask,1000);
+			return true;
 		default:
 			return false;
 		}
@@ -179,7 +193,7 @@ public class OptionsActivity extends BaseGameActivity implements
 		this.mOptionsMenuScene = new MenuScene(this.mCamera);
 		
 		if(isMusicOn){
-			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOn, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
+			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOff, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
 		}else{
 			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOn, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
 		}
@@ -193,9 +207,21 @@ public class OptionsActivity extends BaseGameActivity implements
 		}
 		effectsMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 		this.mOptionsMenuScene.addMenuItem(effectsMenuItem);
+		
+		WAVMenuItem = new ColorMenuItemDecorator(mWAV, 0.5f, 0.5f, 0.5f, 1.0f, 0f, 0f);
+		WAVMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		this.mOptionsMenuScene.addMenuItem(WAVMenuItem);
+		
 		this.mOptionsMenuScene.buildAnimations();
 		this.mOptionsMenuScene.setBackgroundEnabled(false);
 		this.mOptionsMenuScene.setOnMenuItemClickListener(this);
 	}
+	
+	private Runnable mLaunchWAVTask = new Runnable(){
+		public void run(){
+			Intent myIntent = new Intent(OptionsActivity.this,WAVAcitivity.class);
+			OptionsActivity.this.startActivity(myIntent);
+		}
+	};
 
 }
