@@ -6,6 +6,8 @@ package com.impulse.study.helloworld;
 import java.util.Arrays;
 import java.util.Random;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -19,6 +21,13 @@ import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
 import org.anddev.andengine.entity.modifier.RotationModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
+import org.anddev.andengine.entity.particle.ParticleSystem;
+import org.anddev.andengine.entity.particle.emitter.CircleParticleEmitter;
+import org.anddev.andengine.entity.particle.initializer.AlphaInitializer;
+import org.anddev.andengine.entity.particle.initializer.ColorInitializer;
+import org.anddev.andengine.entity.particle.initializer.RotationInitializer;
+import org.anddev.andengine.entity.particle.initializer.VelocityInitializer;
+import org.anddev.andengine.entity.particle.modifier.ExpireModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.AnimatedSprite;
 import org.anddev.andengine.entity.sprite.Sprite;
@@ -69,6 +78,11 @@ public class Level1Activity extends BaseGameActivity {
 
 	private Handler mHandler;
 
+	private Texture mParticleTexture;
+	private TextureRegion mParticleTextureRegion;
+	private ParticleSystem particleSystem;
+	private CircleParticleEmitter particleEmitter;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -88,7 +102,7 @@ public class Level1Activity extends BaseGameActivity {
 	public void onLoadResources() {
 		mHandler = new Handler();
 		gen = new Random();
-		
+
 		TextureRegionFactory.setAssetBasePath("gfx/Level1/");
 		mLevel1BackTexture = new Texture(512, 512,
 				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
@@ -120,6 +134,13 @@ public class Level1Activity extends BaseGameActivity {
 		mPigTiledTextureRegion = TextureRegionFactory.createTiledFromAsset(
 				mPigTexture, this, "pig.png", 0, 0, 4, 4);
 		mEngine.getTextureManager().loadTexture(this.mPigTexture);
+
+		TextureRegionFactory.setAssetBasePath("gfx/particles/");
+		mParticleTexture = new Texture(32, 32,
+				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+		mParticleTextureRegion = TextureRegionFactory.createFromAsset(
+				this.mParticleTexture, this, "particle_fire.png", 0, 0);
+		mEngine.getTextureManager().loadTexture(mParticleTexture);
 	}
 
 	/*
@@ -142,19 +163,23 @@ public class Level1Activity extends BaseGameActivity {
 				mBoxTextureRegion.getHeight() + 50f, mBoxTextureRegion);
 		scene.getLastChild().attachChild(obstacleBox);
 		final Sprite bullet = new Sprite(20.0f, CAMERA_HEIGHT - 50f,
-				mBulletTextureRegion){
+				mBulletTextureRegion) {
 			@Override
-			//pTouchAreaLocalX，pTouchAreaLocalY在这个sprite中的相当位置（左上角为（0，0））
-			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,final float pTouchAreaLocalX,final float pTouchAreaLocalY){
-				switch(pAreaTouchEvent.getAction()){
+			// pTouchAreaLocalX，pTouchAreaLocalY在这个sprite中的相当位置（左上角为（0，0））
+			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,
+					final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+				switch (pAreaTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
-					Toast.makeText(Level1Activity.this, "Sprite touch Down", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Level1Activity.this, "Sprite touch Down",
+							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_UP:
-					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Level1Activity.this, "Sprite touch UP",
+							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_MOVE:
-					this.setPosition(pAreaTouchEvent.getX()-this.getWidth()/2, pAreaTouchEvent.getY()-this.getHeight()/2);
+					this.setPosition(pAreaTouchEvent.getX() - this.getWidth()
+							/ 2, pAreaTouchEvent.getY() - this.getHeight() / 2);
 					break;
 				}
 				return true;
@@ -167,18 +192,22 @@ public class Level1Activity extends BaseGameActivity {
 								0.5f, 1.0f), new RotationModifier(3, 0, 360))));
 		scene.getLastChild().attachChild(bullet);
 		final Sprite cross = new Sprite(bullet.getInitialX() + 50f,
-				CAMERA_HEIGHT - 100.0f, mCrossTextureRegion){
+				CAMERA_HEIGHT - 100.0f, mCrossTextureRegion) {
 			@Override
-			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,final float pTouchAreaLocalX,final float pTouchAreaLocalY){
-				switch(pAreaTouchEvent.getAction()){
+			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,
+					final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+				switch (pAreaTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
-					Toast.makeText(Level1Activity.this, "Sprite touch Down", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Level1Activity.this, "Sprite touch Down",
+							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_UP:
-					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Level1Activity.this, "Sprite touch UP",
+							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_MOVE:
-					this.setPosition(pAreaTouchEvent.getX()-this.getWidth()/2, pAreaTouchEvent.getY()-this.getHeight()/2);
+					this.setPosition(pAreaTouchEvent.getX() - this.getWidth()
+							/ 2, pAreaTouchEvent.getY() - this.getHeight() / 2);
 					break;
 				}
 				return true;
@@ -192,33 +221,38 @@ public class Level1Activity extends BaseGameActivity {
 		cross.registerEntityModifier(new AlphaModifier(10.0f, 0.0f, 1.0f));
 		scene.getLastChild().attachChild(cross);
 		final Sprite hatchet = new Sprite(cross.getInitialX() + 50.0f,
-				CAMERA_HEIGHT - 100.0f, mHatchetTextureRegion){
+				CAMERA_HEIGHT - 100.0f, mHatchetTextureRegion) {
 			@Override
-			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,final float pTouchAreaLocalX,final float pTouchAreaLocalY){
-				switch(pAreaTouchEvent.getAction()){
+			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,
+					final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
+				switch (pAreaTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
-					Toast.makeText(Level1Activity.this, "Sprite touch Down", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Level1Activity.this, "Sprite touch Down",
+							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_UP:
-					Toast.makeText(Level1Activity.this, "Sprite touch UP", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Level1Activity.this, "Sprite touch UP",
+							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_MOVE:
-					this.setPosition(pAreaTouchEvent.getX()-this.getWidth()/2, pAreaTouchEvent.getY()-this.getHeight()/2);
+					this.setPosition(pAreaTouchEvent.getX() - this.getWidth()
+							/ 2, pAreaTouchEvent.getY() - this.getHeight() / 2);
 					break;
 				}
 				return true;
 			}
 		};
+
 		hatchet.registerEntityModifier(new SequenceEntityModifier(
 				new ParallelEntityModifier(new MoveYModifier(5, 0.0f,
 						CAMERA_HEIGHT - 100.0f, EaseQuadOut.getInstance()),
 						new AlphaModifier(5, 0.0f, 1.0f), new ScaleModifier(5,
 								0.5f, 1.0f)), new RotationModifier(2, 0, 360)));
-		//hatchet.registerEntityModifier(new AlphaModifier(15f, 0.0f, 1.0f));
+		// hatchet.registerEntityModifier(new AlphaModifier(15f, 0.0f, 1.0f));
 		scene.getLastChild().attachChild(hatchet);
 		scene.registerEntityModifier(new AlphaModifier(10, 0.0f, 1.0f));
-		
-		//注册触摸事件
+
+		// 注册触摸事件
 		scene.setTouchAreaBindingEnabled(true);
 		scene.registerTouchArea(bullet);
 		scene.registerTouchArea(cross);
@@ -226,6 +260,40 @@ public class Level1Activity extends BaseGameActivity {
 
 		nVamp = 0;
 		mHandler.postDelayed(mStartVamp, 5000);
+
+		particleEmitter = new CircleParticleEmitter(CAMERA_WIDTH * 0.5f,
+				CAMERA_HEIGHT * 0.5f + 20, 40);
+		particleSystem = new ParticleSystem(particleEmitter, 100, 100, 500,
+				this.mParticleTextureRegion);
+
+		particleSystem.addParticleInitializer(new ColorInitializer(1, 0, 0));
+		particleSystem.addParticleInitializer(new AlphaInitializer(0));
+		particleSystem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
+		particleSystem.addParticleInitializer(new VelocityInitializer(-2, 2,
+				-2, -2));
+		particleSystem
+				.addParticleInitializer(new RotationInitializer(0f, 360f));
+
+		particleSystem
+				.addParticleModifier(new org.anddev.andengine.entity.particle.modifier.ScaleModifier(
+						1f, 2f, 0, 5));
+		particleSystem
+				.addParticleModifier(new org.anddev.andengine.entity.particle.modifier.ColorModifier(
+						1, 1, 0, 0.5f, 0, 0, 0, 3));
+		particleSystem
+				.addParticleModifier(new org.anddev.andengine.entity.particle.modifier.ColorModifier(
+						1, 1, 0.5f, 1, 0, 1, 2, 4));
+		particleSystem
+				.addParticleModifier(new org.anddev.andengine.entity.particle.modifier.AlphaModifier(
+						0, 1, 0, 1));
+		particleSystem
+				.addParticleModifier(new org.anddev.andengine.entity.particle.modifier.AlphaModifier(
+						1, 0, 3, 4));
+		particleSystem.addParticleModifier(new ExpireModifier(2, 4));
+
+		particleSystem.setParticlesSpawnEnabled(false);
+		scene.getLastChild().attachChild(particleSystem);
+
 		return scene;
 	}
 
@@ -246,7 +314,40 @@ public class Level1Activity extends BaseGameActivity {
 			Scene scene = Level1Activity.this.mEngine.getScene();
 			float startY = gen.nextFloat() * (CAMERA_HEIGHT - 50f);
 			asprVamp[i] = new AnimatedSprite(CAMERA_WIDTH - 30f, startY,
-					mPigTiledTextureRegion.clone());
+					mPigTiledTextureRegion.clone()) {
+				@Override
+				public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,
+						final float pTouchAreaLocalX,
+						final float pTouchAreaLocalY) {
+					switch (pAreaTouchEvent.getAction()) {
+					case TouchEvent.ACTION_DOWN:
+						for (int j = 0; j < nVamp; j++) {
+							if ((Math.abs(asprVamp[j].getX()
+									+ (asprVamp[j].getWidth()) / 2)
+									- pAreaTouchEvent.getX() < 10.0f)
+									&& (Math.abs(asprVamp[j].getY()
+											+ asprVamp[j].getHeight()
+											- pAreaTouchEvent.getY()) < 10.0f)) {
+								particleEmitter.setCenter(
+										asprVamp[j].getX()
+												+ (asprVamp[j].getWidth()) / 2,
+										asprVamp[j].getY()
+												+ asprVamp[j].getHeight()/2);
+								particleSystem.setParticlesSpawnEnabled(true);
+								mHandler.postDelayed(mEndPESpawn, 3000);
+								asprVamp[j].clearEntityModifiers();
+								asprVamp[j]
+										.registerEntityModifier(new AlphaModifier(
+												1.0f, 1.0f, 0.0f));
+								asprVamp[j].setPosition(CAMERA_WIDTH,
+										gen.nextFloat() * CAMERA_HEIGHT);
+								break;
+							}
+						}
+					}
+					return true;
+				}
+			};
 			final long[] frameDurations = new long[4];
 			Arrays.fill(frameDurations, 500);
 			asprVamp[i].animate(frameDurations, 4, 7, true);
@@ -254,11 +355,18 @@ public class Level1Activity extends BaseGameActivity {
 					new AlphaModifier(5f, 0f, 1f), new MoveModifier(60f,
 							asprVamp[i].getX(), 30f, asprVamp[i].getY(),
 							CAMERA_HEIGHT / 2)));
-			
+
 			scene.getLastChild().attachChild(asprVamp[i]);
-			if(nVamp < 10){
+			if (nVamp < 10) {
 				mHandler.postDelayed(mStartVamp, 5000);
 			}
+			scene.registerTouchArea(asprVamp[i]);
+		}
+	};
+
+	private Runnable mEndPESpawn = new Runnable() {
+		public void run() {
+			particleSystem.setParticlesSpawnEnabled(false);
 		}
 	};
 
