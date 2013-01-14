@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.BitmapFactory.Options;
 import android.view.KeyEvent;
@@ -69,11 +70,16 @@ public class MainMenuActivity extends BaseGameActivity implements
 	protected TextureRegion mMenuHelpTextureRegion;
 	private boolean popupDisplayed;
 	
+	private SharedPreferences audioOptions;
+	
 	protected Handler mHandler;
 
 	public Engine onLoadEngine() {
 		mHandler = new Handler();
 		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+		
+		audioOptions = getSharedPreferences("audio", MODE_PRIVATE);
+		
 		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
 				new FillResolutionPolicy(),
 				this.mCamera));
@@ -110,6 +116,10 @@ public class MainMenuActivity extends BaseGameActivity implements
 	
 	public void onResumeGame(){
 		super.onResumeGame();
+		if(audioOptions.getBoolean("musicOn", true)){
+			StartActivity.mMusic.resume();
+		}
+		
 		mMainScene.registerEntityModifier(new ScaleAtModifier(0.5f, 0.0f, 1.0f, CAMERA_WIDTH/2, CAMERA_HEIGHT/2));
 	}
 
@@ -268,4 +278,10 @@ public class MainMenuActivity extends BaseGameActivity implements
 			MainMenuActivity.this.startActivity(myIntent);
 		}
 	};
+	
+	@Override
+	public void onPauseGame(){
+		super.onPauseGame();
+		StartActivity.mMusic.pause();
+	}
 }

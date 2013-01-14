@@ -11,6 +11,7 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.modifier.ScaleAtModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.menu.MenuScene;
@@ -29,6 +30,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Handler;
 
@@ -44,7 +46,7 @@ public class OptionsActivity extends BaseGameActivity implements
 
 	protected static final int MENU_MUSIC = 0;
 	protected static final int MENU_EFFECTS = MENU_MUSIC + 1;
-	protected static final int MENU_WAV = MENU_EFFECTS +1;
+	protected static final int MENU_WAV = MENU_EFFECTS + 1;
 
 	protected Camera mCamera;
 
@@ -57,9 +59,9 @@ public class OptionsActivity extends BaseGameActivity implements
 	protected MenuScene mOptionsMenuScene;
 	private TextMenuItem mTurnMusicOff, mTurnMusicOn;
 	private TextMenuItem mTurnEffectsOff, mTurnEffectsOn;
-	
+
 	private TextMenuItem mWAV;
-	
+
 	private IMenuItem musicMenuItem;
 	private IMenuItem effectsMenuItem;
 	private IMenuItem WAVMenuItem;
@@ -67,8 +69,8 @@ public class OptionsActivity extends BaseGameActivity implements
 	private Texture mFontTexture;
 	private Font mFont;
 
-	public boolean isMusicOn = true;
-	public boolean isEffectsOn = true;
+	private SharedPreferences audioOptions;
+	private SharedPreferences.Editor audioEditor;
 
 	/*
 	 * (non-Javadoc)
@@ -78,6 +80,10 @@ public class OptionsActivity extends BaseGameActivity implements
 	public Engine onLoadEngine() {
 		mHandler = new Handler();
 		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+
+		audioOptions = getSharedPreferences("audio", MODE_PRIVATE);
+		audioEditor = audioOptions.edit();
+
 		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
 				new FillResolutionPolicy(), this.mCamera));
 	}
@@ -111,7 +117,7 @@ public class OptionsActivity extends BaseGameActivity implements
 				"Turn Effects On");
 		mTurnEffectsOff = new TextMenuItem(MENU_EFFECTS, mFont,
 				"Turn Effects Off");
-		
+
 		mWAV = new TextMenuItem(MENU_WAV, mFont, "What a Vampire");
 	}
 
@@ -122,7 +128,7 @@ public class OptionsActivity extends BaseGameActivity implements
 	 */
 	public Scene onLoadScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
-		
+
 		this.createOptionsMenuScene();
 
 		final int centerX = (CAMERA_WIDTH - this.mMenuBackTextureRegion
@@ -160,29 +166,37 @@ public class OptionsActivity extends BaseGameActivity implements
 			float pMenuItemLocalX, float pMenuItemLocalY) {
 		switch (pMenuItem.getID()) {
 		case MENU_MUSIC:
-			if (isMusicOn) {
-				isMusicOn = false;
+			if (audioOptions.getBoolean("musicOn", true)) {
+				audioEditor.putBoolean("musicOn", false);
+				// if(StartActivity.mMusic.isPlaying()){
+				StartActivity.mMusic.pause();
+				// }
 			} else {
-				isMusicOn = true;
+				audioEditor.putBoolean("musicOn", true);
+				StartActivity.mMusic.resume();
 			}
+			audioEditor.commit();
 			createOptionsMenuScene();
 			mMainScene.clearChildScene();
 			mMainScene.setChildScene(mOptionsMenuScene);
 			return true;
 		case MENU_EFFECTS:
-			if (isEffectsOn) {
-				isEffectsOn = false;
-			} else {
-				isEffectsOn = true;
+			if(audioOptions.getBoolean("effectsOn", true)){
+				audioEditor.putBoolean("effectsOn", false);
+			}else{
+				audioEditor.putBoolean("effectsOn", true);
 			}
+			audioEditor.commit();
 			createOptionsMenuScene();
 			mMainScene.clearChildScene();
 			mMainScene.setChildScene(mOptionsMenuScene);
 			return true;
 		case MENU_WAV:
-			mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0f));
-			mOptionsMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0f));
-			mHandler.postDelayed(mLaunchWAVTask,1000);
+			mMainScene
+					.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0f));
+			mOptionsMenuScene.registerEntityModifier(new ScaleModifier(1.0f,
+					1.0f, 0f));
+			mHandler.postDelayed(mLaunchWAVTask, 1000);
 			return true;
 		default:
 			return false;
@@ -191,37 +205,64 @@ public class OptionsActivity extends BaseGameActivity implements
 
 	protected void createOptionsMenuScene() {
 		this.mOptionsMenuScene = new MenuScene(this.mCamera);
-		
-		if(isMusicOn){
-			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOff, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
-		}else{
-			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOn, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
+
+		if (audioOptions.getBoolean("musicOn", true)) {
+			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOff, 0.5f,
+					0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
+		} else {
+			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOn, 0.5f,
+					0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
 		}
-		musicMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		musicMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+				GL10.GL_ONE_MINUS_SRC_ALPHA);
 		this.mOptionsMenuScene.addMenuItem(musicMenuItem);
-		
-		if(isEffectsOn){
-			effectsMenuItem = new ColorMenuItemDecorator(mTurnEffectsOff, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
-		}else{
-			effectsMenuItem = new ColorMenuItemDecorator(mTurnEffectsOn, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
+
+		if (audioOptions.getBoolean("effectsOn", true)) {
+			effectsMenuItem = new ColorMenuItemDecorator(mTurnEffectsOff, 0.5f,
+					0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
+		} else {
+			effectsMenuItem = new ColorMenuItemDecorator(mTurnEffectsOn, 0.5f,
+					0.5f, 0.5f, 1.0f, 0.0f, 0.0f);
 		}
-		effectsMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		effectsMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+				GL10.GL_ONE_MINUS_SRC_ALPHA);
 		this.mOptionsMenuScene.addMenuItem(effectsMenuItem);
-		
-		WAVMenuItem = new ColorMenuItemDecorator(mWAV, 0.5f, 0.5f, 0.5f, 1.0f, 0f, 0f);
-		WAVMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+
+		WAVMenuItem = new ColorMenuItemDecorator(mWAV, 0.5f, 0.5f, 0.5f, 1.0f,
+				0f, 0f);
+		WAVMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+				GL10.GL_ONE_MINUS_SRC_ALPHA);
 		this.mOptionsMenuScene.addMenuItem(WAVMenuItem);
-		
+
 		this.mOptionsMenuScene.buildAnimations();
 		this.mOptionsMenuScene.setBackgroundEnabled(false);
 		this.mOptionsMenuScene.setOnMenuItemClickListener(this);
 	}
-	
-	private Runnable mLaunchWAVTask = new Runnable(){
-		public void run(){
-			Intent myIntent = new Intent(OptionsActivity.this,WAVAcitivity.class);
+
+	private Runnable mLaunchWAVTask = new Runnable() {
+		public void run() {
+			Intent myIntent = new Intent(OptionsActivity.this,
+					WAVAcitivity.class);
 			OptionsActivity.this.startActivity(myIntent);
 		}
 	};
+
+	@Override
+	public void onPauseGame() {
+		super.onPauseGame();
+		StartActivity.mMusic.pause();
+	}
+
+	@Override
+	public void onResumeGame() {
+		super.onResumeGame();
+		if (audioOptions.getBoolean("musicOn", false)) {
+			StartActivity.mMusic.resume();
+		}
+		mMainScene.registerEntityModifier(new ScaleAtModifier(0.5f, 0f, 1f,
+				CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2));
+		mOptionsMenuScene.registerEntityModifier(new ScaleAtModifier(0.5f, 0f,
+				1f, CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2));
+	}
 
 }
