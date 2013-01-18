@@ -3,21 +3,28 @@
  */
 package com.impulse.study.helloworld;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.audio.sound.Sound;
+import org.anddev.andengine.audio.sound.SoundFactory;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.modifier.AlphaModifier;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.modifier.MoveModifier;
+import org.anddev.andengine.entity.modifier.MoveXModifier;
 import org.anddev.andengine.entity.modifier.MoveYModifier;
 import org.anddev.andengine.entity.modifier.ParallelEntityModifier;
+import org.anddev.andengine.entity.modifier.RotationAtModifier;
 import org.anddev.andengine.entity.modifier.RotationModifier;
 import org.anddev.andengine.entity.modifier.ScaleModifier;
 import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
@@ -42,9 +49,15 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TiledTextureRegion;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
+import org.anddev.andengine.util.Debug;
+import org.anddev.andengine.util.modifier.IModifier;
+import org.anddev.andengine.util.modifier.IModifier.IModifierListener;
 import org.anddev.andengine.util.modifier.ease.EaseQuadOut;
+import org.anddev.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
 
+import android.content.SharedPreferences;
 import android.os.Handler;
+import android.text.style.BulletSpan;
 import android.widget.Toast;
 
 /**
@@ -83,15 +96,22 @@ public class Level1Activity extends BaseGameActivity {
 	private ParticleSystem particleSystem;
 	private CircleParticleEmitter particleEmitter;
 
+	private Sound mExploSound, mGunshotSound, mWhiffieSound;
+	private SharedPreferences audioOptions;
+
+	private Sprite bullet,hatchet;
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.anddev.andengine.ui.IGameInterface#onLoadEngine()
 	 */
 	public Engine onLoadEngine() {
+
+		audioOptions = getSharedPreferences("audio", MODE_PRIVATE);
 		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
-				new FillResolutionPolicy(), this.mCamera));
+				new FillResolutionPolicy(), this.mCamera).setNeedsSound(true));
 	}
 
 	/*
@@ -141,6 +161,21 @@ public class Level1Activity extends BaseGameActivity {
 		mParticleTextureRegion = TextureRegionFactory.createFromAsset(
 				this.mParticleTexture, this, "particle_fire.png", 0, 0);
 		mEngine.getTextureManager().loadTexture(mParticleTexture);
+
+		SoundFactory.setAssetBasePath("mfx/");
+		try {
+			this.mExploSound = SoundFactory.createSoundFromAsset(
+					this.mEngine.getSoundManager(), getApplicationContext(),
+					"exploSound.ogg");
+			this.mGunshotSound = SoundFactory.createSoundFromAsset(
+					this.mEngine.getSoundManager(), getApplicationContext(),
+					"gunshot.ogg");
+			this.mWhiffieSound = SoundFactory.createSoundFromAsset(
+					this.getSoundManager(), getApplicationContext(),
+					"whiffle.ogg");
+		} catch (final IOException e) {
+			Debug.e(e);
+		}
 	}
 
 	/*
@@ -162,20 +197,20 @@ public class Level1Activity extends BaseGameActivity {
 		final Sprite obstacleBox = new Sprite(20.0f,
 				mBoxTextureRegion.getHeight() + 50f, mBoxTextureRegion);
 		scene.getLastChild().attachChild(obstacleBox);
-		final Sprite bullet = new Sprite(20.0f, CAMERA_HEIGHT - 50f,
-				mBulletTextureRegion) {
+		bullet = new Sprite(20.0f, CAMERA_HEIGHT - 50f, mBulletTextureRegion) {
 			@Override
 			// pTouchAreaLocalX，pTouchAreaLocalY在这个sprite中的相当位置（左上角为（0，0））
 			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,
 					final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
 				switch (pAreaTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
-					Toast.makeText(Level1Activity.this, "Sprite touch Down",
-							Toast.LENGTH_SHORT).show();
+//					Toast.makeText(Level1Activity.this, "Sprite touch Down",
+//							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_UP:
-					Toast.makeText(Level1Activity.this, "Sprite touch UP",
-							Toast.LENGTH_SHORT).show();
+//					Toast.makeText(Level1Activity.this, "Sprite touch UP",
+//							Toast.LENGTH_SHORT).show();
+					fireBullet(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
 					break;
 				case TouchEvent.ACTION_MOVE:
 					this.setPosition(pAreaTouchEvent.getX() - this.getWidth()
@@ -198,12 +233,13 @@ public class Level1Activity extends BaseGameActivity {
 					final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
 				switch (pAreaTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
-					Toast.makeText(Level1Activity.this, "Sprite touch Down",
-							Toast.LENGTH_SHORT).show();
+//					Toast.makeText(Level1Activity.this, "Sprite touch Down",
+//							Toast.LENGTH_SHORT).show();
 					break;
 				case TouchEvent.ACTION_UP:
-					Toast.makeText(Level1Activity.this, "Sprite touch UP",
-							Toast.LENGTH_SHORT).show();
+//					Toast.makeText(Level1Activity.this, "Sprite touch UP",
+//							Toast.LENGTH_SHORT).show();
+					throwHatchet(pAreaTouchEvent.getX(), pAreaTouchEvent.getY());
 					break;
 				case TouchEvent.ACTION_MOVE:
 					this.setPosition(pAreaTouchEvent.getX() - this.getWidth()
@@ -220,7 +256,7 @@ public class Level1Activity extends BaseGameActivity {
 								0.f, 1.0f), new RotationModifier(2, 0, 360))));
 		cross.registerEntityModifier(new AlphaModifier(10.0f, 0.0f, 1.0f));
 		scene.getLastChild().attachChild(cross);
-		final Sprite hatchet = new Sprite(cross.getInitialX() + 50.0f,
+		hatchet = new Sprite(cross.getInitialX() + 50.0f,
 				CAMERA_HEIGHT - 100.0f, mHatchetTextureRegion) {
 			@Override
 			public boolean onAreaTouched(final TouchEvent pAreaTouchEvent,
@@ -332,7 +368,7 @@ public class Level1Activity extends BaseGameActivity {
 										asprVamp[j].getX()
 												+ (asprVamp[j].getWidth()) / 2,
 										asprVamp[j].getY()
-												+ asprVamp[j].getHeight()/2);
+												+ asprVamp[j].getHeight() / 2);
 								particleSystem.setParticlesSpawnEnabled(true);
 								mHandler.postDelayed(mEndPESpawn, 3000);
 								asprVamp[j].clearEntityModifiers();
@@ -341,6 +377,7 @@ public class Level1Activity extends BaseGameActivity {
 												1.0f, 1.0f, 0.0f));
 								asprVamp[j].setPosition(CAMERA_WIDTH,
 										gen.nextFloat() * CAMERA_HEIGHT);
+								playSound(mExploSound);
 								break;
 							}
 						}
@@ -367,6 +404,61 @@ public class Level1Activity extends BaseGameActivity {
 	private Runnable mEndPESpawn = new Runnable() {
 		public void run() {
 			particleSystem.setParticlesSpawnEnabled(false);
+		}
+	};
+
+	@Override
+	public void onPauseGame() {
+		super.onPauseGame();
+		mGunshotSound.pause();
+		mExploSound.pause();
+	}
+
+	private void playSound(Sound mSound) {
+		if (audioOptions.getBoolean("effectsOn", false)) {
+			mSound.play();
+		}
+	}
+
+	private void fireBullet(float pX, float pY) {
+		this.bullet.registerEntityModifier(new SequenceEntityModifier(
+				new IEntityModifierListener() {
+
+					public void onModifierFinished(
+							IModifier<IEntity> pModifier, IEntity pItem) {
+						Level1Activity.this.runOnUiThread(new Runnable() {
+							
+							public void run() {
+								bullet.setVisible(false);
+								bullet.setPosition(0, 0);
+							}
+						});
+					}
+				}, new RotationModifier(0.5f, 0f, 90f), new MoveXModifier(0.5f,
+						pX, CAMERA_WIDTH), new AlphaModifier(0.1f, 1.0f, 0f)));
+		mHandler.postDelayed(mPlayGunshot, 500);
+	}
+	
+	private void throwHatchet(float pX,float pY){
+		hatchet.registerEntityModifier(new ParallelEntityModifier(new IEntityModifierListener() {
+			
+			public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+				Level1Activity.this.runOnUiThread(new Runnable() {
+					
+					public void run() {
+						hatchet.setVisible(false);
+						hatchet.setPosition(0, 0);
+					}
+				});
+			}
+		}, new RotationAtModifier(5f, 0f, 5f*360f, 20f, 20f),new MoveXModifier(5f, pX, CAMERA_WIDTH)));
+		playSound(mWhiffieSound);
+	}
+	
+	private Runnable mPlayGunshot = new Runnable() {
+		
+		public void run() {
+			playSound(mGunshotSound);
 		}
 	};
 
