@@ -1,4 +1,0 @@
-HelloWord
-=========
-
-learn andengine

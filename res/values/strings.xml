@@ -1,10 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">air</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">StartActivity</string>
     <string name="title_activity_nextpage">NextpageActivity</string>
     <string name="title_activity_main_menu">MainMenuActivity</string>
-
 </resources>
