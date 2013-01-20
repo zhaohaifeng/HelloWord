@@ -14,29 +14,35 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".StartActivity"
-            android:label="@string/title_activity_main" >
+            android:label="@string/title_activity_main"
+            android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
             android:name=".MainMenuActivity"
-            android:label="@string/title_activity_main_menu" >
+            android:label="@string/title_activity_main_menu"
+            android:configChanges="keyboardHidden|orientation">
+
         </activity>
         <activity
             android:name=".Level1Activity"
-            android:label="@string/title_activity_main_menu" >
+            android:label="@string/title_activity_main_menu"
+            android:configChanges="keyboardHidden|orientation">
         </activity>
         <activity
             android:name=".OptionsActivity"
-            android:label="@string/title_activity_main_menu" >
+            android:label="@string/title_activity_main_menu"
+            android:configChanges="keyboardHidden|orientation">
         </activity>
-        <activity
-            android:name=".WAVAcitivity"
-            android:label="@string/title_activity_main_menu" >
-        </activity>
+        <!--<activity-->
+            <!--android:name=".WAVAcitivity"-->
+            <!--android:label="@string/title_activity_main_menu" >-->
+        <!--</activity>-->
     </application>
 
 </manifest>

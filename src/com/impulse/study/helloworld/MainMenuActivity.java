@@ -2,283 +2,293 @@ package com.impulse.study.helloworld;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
-import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
-import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.modifier.ScaleAtModifier;
-import org.anddev.andengine.entity.modifier.ScaleModifier;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.menu.MenuScene;
-import org.anddev.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
-import org.anddev.andengine.entity.scene.menu.animator.SlideMenuAnimator;
-import org.anddev.andengine.entity.scene.menu.item.IMenuItem;
-import org.anddev.andengine.entity.scene.menu.item.SpriteMenuItem;
-import org.anddev.andengine.entity.scene.menu.item.TextMenuItem;
-import org.anddev.andengine.entity.scene.menu.item.decorator.ColorMenuItemDecorator;
-import org.anddev.andengine.entity.sprite.Sprite;
-import org.anddev.andengine.entity.util.FPSLogger;
-import org.anddev.andengine.opengl.font.Font;
-import org.anddev.andengine.opengl.font.FontFactory;
-import org.anddev.andengine.opengl.texture.Texture;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.region.TextureRegion;
-import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
+import android.os.Looper;
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
+import org.andengine.entity.modifier.ScaleAtModifier;
+import org.andengine.entity.modifier.ScaleModifier;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.menu.MenuScene;
+import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
+import org.andengine.entity.scene.menu.animator.SlideMenuAnimator;
+import org.andengine.entity.scene.menu.item.IMenuItem;
+import org.andengine.entity.scene.menu.item.SpriteMenuItem;
+import org.andengine.entity.scene.menu.item.TextMenuItem;
+import org.andengine.entity.scene.menu.item.decorator.ColorMenuItemDecorator;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.util.FPSLogger;
+import org.andengine.opengl.font.FontFactory;
+import org.andengine.opengl.font.IFont;
+import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.texture.region.ITextureRegion;
 
-import android.os.Bundle;
 import android.os.Handler;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.BitmapFactory.Options;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.widget.Toast;
+import org.andengine.ui.activity.SimpleBaseGameActivity;
+import org.andengine.util.color.Color;
 
-public class MainMenuActivity extends BaseGameActivity implements
-		IOnMenuItemClickListener {
-	private static final int CAMERA_WIDTH = 480;
-	private static final int CAMERA_HEIGHT = 320;
+public class MainMenuActivity extends SimpleBaseGameActivity implements
+        IOnMenuItemClickListener {
+    private static final int CAMERA_WIDTH = 480;
+    private static final int CAMERA_HEIGHT = 320;
 
-	protected static final int MENU_ABOUT = 0;
-	protected static final int MENU_QUIT = MENU_ABOUT + 1;
-	protected static final int MENU_PLAY = 10;
-	protected static final int MENU_SCORES = MENU_PLAY + 1;
-	protected static final int MENU_OPTIONS = MENU_SCORES + 1;
-	protected static final int MENU_HELP = MENU_OPTIONS + 1;
+    protected static final int MENU_ABOUT = 0;
+    protected static final int MENU_QUIT = MENU_ABOUT + 1;
+    protected static final int MENU_PLAY = 10;
+    protected static final int MENU_SCORES = MENU_PLAY + 1;
+    protected static final int MENU_OPTIONS = MENU_SCORES + 1;
+    protected static final int MENU_HELP = MENU_OPTIONS + 1;
 
-	protected Camera mCamera;
-	protected Scene mMainScene;
+    protected Camera mCamera;
+    protected Scene mMainScene;
 
-	private Texture mMenuBackTexture;
-	private TextureRegion mMenuBackTextureRegion;
+    private BitmapTextureAtlas mMenuBackTexture;
+    private ITextureRegion mMenuBackTextureRegion;
 
-	protected MenuScene mStaticMenuScene, mPopUpMenuScene;
+    protected MenuScene mStaticMenuScene, mPopUpMenuScene;
 
-	private Texture mPopUpTexture;
-	private Texture mFontTexture;
-	private Font mFont;
-	protected TextureRegion mPopUpAboutTextureRegion;
-	protected TextureRegion mPopUpQuitTextureRegion;
-	protected TextureRegion mMenuPlayTextureRegion;
-	protected TextureRegion mMenuScoresTextureRegion;
-	protected TextureRegion mMenuOptionsTextureRegion;
-	protected TextureRegion mMenuHelpTextureRegion;
-	private boolean popupDisplayed;
-	
-	private SharedPreferences audioOptions;
-	
-	protected Handler mHandler;
+    private BitmapTextureAtlas mPopUpTexture;
+    private ITexture mFontTexture;
+    private IFont mFont;
+    protected ITextureRegion mPopUpAboutTextureRegion;
+    protected ITextureRegion mPopUpQuitTextureRegion;
+    protected ITextureRegion mMenuPlayTextureRegion;
+    protected ITextureRegion mMenuScoresTextureRegion;
+    protected ITextureRegion mMenuOptionsTextureRegion;
+    protected ITextureRegion mMenuHelpTextureRegion;
+    private boolean popupDisplayed;
 
-	public Engine onLoadEngine() {
-		mHandler = new Handler();
-		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-		
-		audioOptions = getSharedPreferences("audio", MODE_PRIVATE);
-		
-		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
-				new FillResolutionPolicy(),
-				this.mCamera));
-	}
+    private SharedPreferences audioOptions;
 
-	public void onLoadResources() {
-		this.mFontTexture = new Texture(256, 256,
-				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+    protected Handler mHandler;
 
-		FontFactory.setAssetBasePath("font/");
-		this.mFont = FontFactory.createFromAsset(this.mFontTexture, this,
-				"yajian.otf", 32, true, Color.YELLOW);
-		this.mEngine.getTextureManager().loadTexture(this.mFontTexture);
-		this.mEngine.getFontManager().loadFont(this.mFont);
 
-		this.mMenuBackTexture = new Texture(512, 512,
-				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-		this.mMenuBackTextureRegion = TextureRegionFactory.createFromAsset(
-				this.mMenuBackTexture, this, "gfx/MainMenu/MainMenuBk.png", 0,
-				0);
-		this.mEngine.getTextureManager().loadTexture(this.mMenuBackTexture);
+    @Override
+    public EngineOptions onCreateEngineOptions() {
+        mHandler = new Handler();
+        this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 
-		this.mPopUpTexture = new Texture(512, 512,
-				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-		this.mPopUpAboutTextureRegion = TextureRegionFactory
-				.createFromAsset(this.mPopUpTexture, this,
-						"gfx/MainMenu/About_button.png", 0, 0);
-		this.mPopUpQuitTextureRegion = TextureRegionFactory
-				.createFromAsset(this.mPopUpTexture, this,
-						"gfx/MainMenu/Quit_button.png", 0, 50);
-		this.mEngine.getTextureManager().loadTexture(this.mPopUpTexture);
-		popupDisplayed = false;
-	}
-	
-	public void onResumeGame(){
-		super.onResumeGame();
-		if(audioOptions.getBoolean("musicOn", true)){
-			StartActivity.mMusic.resume();
-		}
-		
-		mMainScene.registerEntityModifier(new ScaleAtModifier(0.5f, 0.0f, 1.0f, CAMERA_WIDTH/2, CAMERA_HEIGHT/2));
-	}
+        audioOptions = getSharedPreferences("audio", MODE_PRIVATE);
 
-	public Scene onLoadScene() {
-		this.mEngine.registerUpdateHandler(new FPSLogger());
+        return new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
+                new FillResolutionPolicy(),
+                this.mCamera);
+    }
 
-		this.createStaticMenuScene();
-		this.createPopUpMenuScene();
+    @Override
+    protected void onCreateResources() {
+        this.mFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 256, 256,
+                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
-		final int centerX = (CAMERA_WIDTH - this.mMenuBackTextureRegion
-				.getWidth()) / 2;
-		final int centerY = (CAMERA_HEIGHT - this.mMenuBackTextureRegion
-				.getHeight()) / 2;
+        FontFactory.setAssetBasePath("font/");
+        this.mFont = FontFactory.createFromAsset(this.getFontManager(), mFontTexture, this.getAssets(),
+                "yajian.otf", 32f, true, android.graphics.Color.YELLOW);
+        mFont.load();
+//		this.mEngine.getTextureManager().loadTexture(this.mFontTexture);
+//		this.mEngine.getFontManager().loadFont(this.mFont);
 
-		this.mMainScene = new Scene(1);
+        this.mMenuBackTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512,
+                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        this.mMenuBackTextureRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+                this.mMenuBackTexture, this, "gfx/MainMenu/MainMenuBk.png", 0,
+                0);
+        this.mEngine.getTextureManager().loadTexture(this.mMenuBackTexture);
 
-		final Sprite menuBack = new Sprite(centerX, centerY,
-				this.mMenuBackTextureRegion);
-		mMainScene.getLastChild().attachChild(menuBack);
-		mMainScene.setChildScene(mStaticMenuScene);
-		return this.mMainScene;
-	}
+        this.mPopUpTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512,
+                TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+        this.mPopUpAboutTextureRegion = BitmapTextureAtlasTextureRegionFactory
+                .createFromAsset(this.mPopUpTexture, this,
+                        "gfx/MainMenu/About_button.png", 0, 0);
+        this.mPopUpQuitTextureRegion = BitmapTextureAtlasTextureRegionFactory
+                .createFromAsset(this.mPopUpTexture, this,
+                        "gfx/MainMenu/Quit_button.png", 0, 50);
+        this.mEngine.getTextureManager().loadTexture(this.mPopUpTexture);
+        popupDisplayed = false;
+    }
 
-	public void onLoadComplete() {
-		// TODO Auto-generated method stub
+    @Override
+    protected Scene onCreateScene() {
+        this.mEngine.registerUpdateHandler(new FPSLogger());
 
-	}
+        this.createStaticMenuScene();
+        this.createPopUpMenuScene();
 
-	@Override
-	public boolean onKeyDown(final int pKeyCode, final KeyEvent pEvent) {
-		if (pKeyCode == KeyEvent.KEYCODE_MENU
-				&& pEvent.getAction() == KeyEvent.ACTION_DOWN) {
-			if (popupDisplayed) {
-				this.mPopUpMenuScene.back();
-				mMainScene.setChildScene(mStaticMenuScene);
-				popupDisplayed = false;
-			} else {
-				this.mMainScene.setChildScene(this.mPopUpMenuScene, false,
-						true, true);
-				popupDisplayed = true;
-			}
-			return true;
-		} else {
-			return super.onKeyDown(pKeyCode, pEvent);
-		}
-	}
+        final float centerX = (CAMERA_WIDTH - this.mMenuBackTextureRegion
+                .getWidth()) / 2;
+        final float centerY = (CAMERA_HEIGHT - this.mMenuBackTextureRegion
+                .getHeight()) / 2;
 
-	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
-			final float pMenuItemLocalX,final float pMenuItemLocalY) {
-		
-		switch (pMenuItem.getID()) {
-		case MENU_ABOUT:
-			Toast.makeText(MainMenuActivity.this, "Abount selected",
-					Toast.LENGTH_SHORT).show();
-			return true;
-		case MENU_QUIT:
-			this.finish();
-			return true;
-		case MENU_PLAY:
+        this.mMainScene = new Scene();
+
+        final Sprite menuBack = new Sprite(centerX, centerY,
+                this.mMenuBackTextureRegion, this.getVertexBufferObjectManager());
+        mMainScene.attachChild(menuBack);
+        mMainScene.setChildScene(mStaticMenuScene);
+        return this.mMainScene;
+    }
+
+
+    @Override
+    public void onResumeGame() {
+        super.onResumeGame();
+
+        if (audioOptions.getBoolean("musicOn", true)) {
+            StartActivity.mMusic.resume();
+        }
+
+        mMainScene.registerEntityModifier(new ScaleAtModifier(0.5f, 0.0f, 1.0f, CAMERA_WIDTH / 2, CAMERA_HEIGHT / 2));
+    }
+
+    @Override
+    public boolean onKeyDown(final int pKeyCode, final KeyEvent pEvent) {
+        if (pKeyCode == KeyEvent.KEYCODE_MENU
+                && pEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            if (popupDisplayed) {
+                this.mPopUpMenuScene.back();
+                mMainScene.setChildScene(mStaticMenuScene);
+                popupDisplayed = false;
+            } else {
+                this.mMainScene.setChildScene(this.mPopUpMenuScene, false,
+                        true, true);
+                popupDisplayed = true;
+            }
+            return true;
+        } else {
+            return super.onKeyDown(pKeyCode, pEvent);
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
+                                     final float pMenuItemLocalX, final float pMenuItemLocalY) {
+
+        switch (pMenuItem.getID()) {
+            case MENU_ABOUT:
+                showToast("Abount selected");
+                return true;
+            case MENU_QUIT:
+                this.finish();
+                return true;
+            case MENU_PLAY:
 //			Toast.makeText(MainMenuActivity.this, "Play selected",
 //					Toast.LENGTH_SHORT).show();
-			mMainScene.registerEntityModifier(new ScaleModifier(1.0f,1.0f,0.0f));
-			mHandler.postDelayed(mLaunchLevel1Task, 1000);
-			return true;
-		case MENU_SCORES:
-			Toast.makeText(MainMenuActivity.this, "Scores selected",
-					Toast.LENGTH_SHORT).show();
-			return true;
-		case MENU_OPTIONS:
-			
-			mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
-			mStaticMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
-			mHandler.postDelayed(mLaunchOptionsTask, 1000);
-			
+                mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+                this.runOnUiThread(mLaunchLevel1Task);
+                return true;
+            case MENU_SCORES:
+                showToast("Scores selected");
+                return true;
+            case MENU_OPTIONS:
+
+                mMainScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+                mStaticMenuScene.registerEntityModifier(new ScaleModifier(1.0f, 1.0f, 0.0f));
+                mHandler.postDelayed(mLaunchOptionsTask, 1000);
+
 //			Toast.makeText(this, "Options selected", Toast.LENGTH_SHORT).show();
-			return true;
-		case MENU_HELP:
-			Toast.makeText(this, "Help selected", Toast.LENGTH_SHORT).show();
-			return true;
-		default:
-			return false;
-		}
-	}
+                return true;
+            case MENU_HELP:
+                showToast("Help selected");
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	protected void createStaticMenuScene() {
-		this.mStaticMenuScene = new MenuScene(this.mCamera);
-		final IMenuItem playMenuItem = new ColorMenuItemDecorator(
-				new TextMenuItem(MENU_PLAY, mFont, "Play Game"), 0.5f, 0.5f,
-				0.5f, 1.0f, 0.0f, 0.0f);
-		playMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
-				GL10.GL_ONE_MINUS_SRC_ALPHA);
-		this.mStaticMenuScene.addMenuItem(playMenuItem);
+    protected void createStaticMenuScene() {
+        this.mStaticMenuScene = new MenuScene(this.mCamera);
+        final IMenuItem playMenuItem = new ColorMenuItemDecorator(
+                new TextMenuItem(MENU_PLAY, mFont, "Play Game", getVertexBufferObjectManager()), new Color(0.5f, 0.5f, 0.5f), new Color(1.0f, 0.0f, 0.0f));
+        playMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mStaticMenuScene.addMenuItem(playMenuItem);
 
-		final IMenuItem scoresMenuItem = new ColorMenuItemDecorator(
-				new TextMenuItem(MENU_SCORES, mFont, "Scores"), 0.5f, 0.5f,
-				0.5f, 1.0f, 1.0f, 0.0f);
-		scoresMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
-				GL10.GL_ONE_MINUS_SRC_ALPHA);
-		this.mStaticMenuScene.addMenuItem(scoresMenuItem);
+        final IMenuItem scoresMenuItem = new ColorMenuItemDecorator(
+                new TextMenuItem(MENU_SCORES, mFont, "Scores", getVertexBufferObjectManager()), new Color(0.5f, 0.5f,
+                0.5f), new Color(1.0f, 1.0f, 0.0f));
+        scoresMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mStaticMenuScene.addMenuItem(scoresMenuItem);
 
-		final IMenuItem optionsMenuItem = new ColorMenuItemDecorator(
-				new TextMenuItem(MENU_OPTIONS, mFont, "Options"), 0.5f, 0.5f,
-				0.5f, 1.0f, 0.0f, 0.0f);
-		optionsMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
-				GL10.GL_ONE_MINUS_SRC_ALPHA);
-		this.mStaticMenuScene.addMenuItem(optionsMenuItem);
+        final IMenuItem optionsMenuItem = new ColorMenuItemDecorator(
+                new TextMenuItem(MENU_OPTIONS, mFont, "Options", getVertexBufferObjectManager()), new Color(0.5f, 0.5f,
+                0.5f), new Color(1.0f, 0.0f, 0.0f));
+        optionsMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mStaticMenuScene.addMenuItem(optionsMenuItem);
 
-		final IMenuItem helpMenuItem = new ColorMenuItemDecorator(
-				new TextMenuItem(MENU_HELP, mFont, "Help"), 0.5f, 0.5f, 0.5f,
-				1.5f, 0.0f, 0.0f);
-		helpMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
-				GL10.GL_ONE_MINUS_SRC_ALPHA);
-		this.mStaticMenuScene.addMenuItem(helpMenuItem);
+        final IMenuItem helpMenuItem = new ColorMenuItemDecorator(
+                new TextMenuItem(MENU_HELP, mFont, "Help", getVertexBufferObjectManager()), new Color(0.5f, 0.5f, 0.5f),
+                new Color(1.5f, 0.0f, 0.0f));
+        helpMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mStaticMenuScene.addMenuItem(helpMenuItem);
 
-		this.mStaticMenuScene.buildAnimations();
+        this.mStaticMenuScene.buildAnimations();
 
-		this.mStaticMenuScene.setBackgroundEnabled(false);
-		this.mStaticMenuScene.setOnMenuItemClickListener(this);
-	}
+        this.mStaticMenuScene.setBackgroundEnabled(false);
+        this.mStaticMenuScene.setOnMenuItemClickListener(this);
+    }
 
-	protected void createPopUpMenuScene() {
-		this.mPopUpMenuScene = new MenuScene(this.mCamera);
+    protected void createPopUpMenuScene() {
+        this.mPopUpMenuScene = new MenuScene(this.mCamera);
 
-		final SpriteMenuItem aboutMenuItem = new SpriteMenuItem(MENU_ABOUT,
-				this.mPopUpAboutTextureRegion);
-		aboutMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
-				GL10.GL_ONE_MINUS_SRC_ALPHA);
-		this.mPopUpMenuScene.addMenuItem(aboutMenuItem);
+        final SpriteMenuItem aboutMenuItem = new SpriteMenuItem(MENU_ABOUT,
+                this.mPopUpAboutTextureRegion, getVertexBufferObjectManager());
+        aboutMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mPopUpMenuScene.addMenuItem(aboutMenuItem);
 
-		final SpriteMenuItem quitMenuItem = new SpriteMenuItem(MENU_QUIT,
-				this.mPopUpQuitTextureRegion);
-		quitMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
-				GL10.GL_ONE_MINUS_SRC_ALPHA);
-		this.mPopUpMenuScene.addMenuItem(quitMenuItem);
+        final SpriteMenuItem quitMenuItem = new SpriteMenuItem(MENU_QUIT,
+                this.mPopUpQuitTextureRegion, getVertexBufferObjectManager());
+        quitMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mPopUpMenuScene.addMenuItem(quitMenuItem);
 
-		this.mPopUpMenuScene.setMenuAnimator(new SlideMenuAnimator());
+        this.mPopUpMenuScene.setMenuAnimator(new SlideMenuAnimator());
 
-		this.mPopUpMenuScene.buildAnimations();
+        this.mPopUpMenuScene.buildAnimations();
 
-		this.mPopUpMenuScene.setBackgroundEnabled(false);
-		this.mPopUpMenuScene.setOnMenuItemClickListener(this);
+        this.mPopUpMenuScene.setBackgroundEnabled(false);
+        this.mPopUpMenuScene.setOnMenuItemClickListener(this);
 
-	}
-	
-	private Runnable mLaunchLevel1Task = new Runnable(){
-		public void run(){
-			Intent myIntent = new Intent(MainMenuActivity.this,Level1Activity.class);
-			MainMenuActivity.this.startActivity(myIntent);
-		}
-	};
-	
-	private Runnable mLaunchOptionsTask = new Runnable() {
-		
-		public void run() {
-			Intent myIntent = new Intent(MainMenuActivity.this,OptionsActivity.class);
-			MainMenuActivity.this.startActivity(myIntent);
-		}
-	};
-	
+    }
+
+    private Runnable mLaunchLevel1Task = new Runnable() {
+        public void run() {
+            Intent myIntent = new Intent(MainMenuActivity.this, Level1Activity.class);
+            MainMenuActivity.this.startActivity(myIntent);
+        }
+    };
+
+    private Runnable mLaunchOptionsTask = new Runnable() {
+
+        public void run() {
+            Intent myIntent = new Intent(MainMenuActivity.this, OptionsActivity.class);
+            MainMenuActivity.this.startActivity(myIntent);
+        }
+    };
+
+    private void showToast(final String toast) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Toast.makeText(MainMenuActivity.this, toast,
+                        Toast.LENGTH_SHORT).show();
+                Looper.loop();
+            }
+        }).start();
+
+    }
+
 	@Override
 	public void onPauseGame(){
 		super.onPauseGame();
