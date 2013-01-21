@@ -5,26 +5,27 @@ package com.impulse.study.helloworld;
 
 import java.util.Random;
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
-import org.anddev.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLayer;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXLoader.ITMXTilePropertiesListener;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXProperties;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXTile;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXTileProperty;
-import org.anddev.andengine.entity.layer.tiled.tmx.TMXTiledMap;
-import org.anddev.andengine.entity.layer.tiled.tmx.util.exception.TMXLoadException;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.util.FPSLogger;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
-import org.anddev.andengine.util.Debug;
+import org.andengine.engine.Engine;
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
+import org.andengine.extension.tmx.TMXLayer;
+import org.andengine.extension.tmx.TMXLoader;
+import org.andengine.extension.tmx.TMXLoader.ITMXTilePropertiesListener;
+import org.andengine.extension.tmx.TMXProperties;
+import org.andengine.extension.tmx.TMXTile;
+import org.andengine.extension.tmx.TMXTileProperty;
+import org.andengine.extension.tmx.TMXTiledMap;
+import org.andengine.extension.tmx.util.exception.TMXLoadException;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.ui.IGameInterface;
+import org.andengine.ui.activity.BaseGameActivity;
+import org.andengine.util.debug.Debug;
 
 import android.os.Handler;
 
@@ -56,21 +57,21 @@ public class WAVAcitivity extends BaseGameActivity {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.anddev.andengine.ui.IGameInterface#onLoadEngine()
+	 * @see org.andengine.ui.IGameInterface#onLoadEngine()
 	 */
 	public Engine onLoadEngine() {
 		mHandler = new Handler();
 		gen = new Random();
 		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
 
-		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE,
+		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
 				new FillResolutionPolicy(), this.mCamera));
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.anddev.andengine.ui.IGameInterface#onLoadResources()
+	 * @see org.andengine.ui.IGameInterface#onLoadResources()
 	 */
 	public void onLoadResources() {
 	}
@@ -78,16 +79,17 @@ public class WAVAcitivity extends BaseGameActivity {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.anddev.andengine.ui.IGameInterface#onLoadScene()
+	 * @see org.andengine.ui.IGameInterface#onLoadScene()
 	 */
 	public Scene onLoadScene() {
 		this.mEngine.registerUpdateHandler(new FPSLogger());
 
-		final Scene scene = new Scene(1);
+		final Scene scene = new Scene();
 		try {
-			final TMXLoader tmxLoader = new TMXLoader(this,
+			final TMXLoader tmxLoader = new TMXLoader(this.getAssets(),
 					this.mEngine.getTextureManager(),
 					TextureOptions.BILINEAR_PREMULTIPLYALPHA,
+                    this.getVertexBufferObjectManager(),
 					new ITMXTilePropertiesListener() {
 						public void onTMXTileWithPropertiesCreated(
 								TMXTiledMap pTMXTiledMap,
@@ -105,7 +107,7 @@ public class WAVAcitivity extends BaseGameActivity {
 						}
 
 					});
-			this.mWAVTMXMap = tmxLoader.loadFromAsset(this,
+			this.mWAVTMXMap = tmxLoader.loadFromAsset(
 					"gfx/WAV/WAVMap.tmx");
 		} catch (final TMXLoadException e) {
 			Debug.e(e);
@@ -137,7 +139,7 @@ public class WAVAcitivity extends BaseGameActivity {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.anddev.andengine.ui.IGameInterface#onLoadComplete()
+	 * @see org.andengine.ui.IGameInterface#onLoadComplete()
 	 */
 	public void onLoadComplete() {
 		
@@ -155,4 +157,23 @@ public class WAVAcitivity extends BaseGameActivity {
 		}
 	};
 
+    @Override
+    public EngineOptions onCreateEngineOptions() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

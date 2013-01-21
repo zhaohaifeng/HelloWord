@@ -166,9 +166,9 @@ public class OptionsActivity extends SimpleBaseGameActivity implements
 
 	private Runnable mLaunchWAVTask = new Runnable() {
 		public void run() {
-//			Intent myIntent = new Intent(OptionsActivity.this,
-//					WAVAcitivity.class);
-//			OptionsActivity.this.startActivity(myIntent);
+			Intent myIntent = new Intent(OptionsActivity.this,
+					WAVAcitivity.class);
+			OptionsActivity.this.startActivity(myIntent);
 		}
 	};
 
