@@ -23,8 +23,8 @@ import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.TextureOptions;
-import org.andengine.ui.IGameInterface;
 import org.andengine.ui.activity.BaseGameActivity;
+import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.debug.Debug;
 
 import android.os.Handler;
@@ -33,7 +33,7 @@ import android.os.Handler;
  * @author zhaohaifeng
  * 
  */
-public class WAVAcitivity extends BaseGameActivity {
+public class WAVAcitivity extends SimpleBaseGameActivity {
 
 	private static final int CAMERA_WIDTH = 480;
 	private static final int CAMERA_HEIGHT = 320;
@@ -54,97 +54,6 @@ public class WAVAcitivity extends BaseGameActivity {
 
 	private Random gen;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.andengine.ui.IGameInterface#onLoadEngine()
-	 */
-	public Engine onLoadEngine() {
-		mHandler = new Handler();
-		gen = new Random();
-		this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-
-		return new Engine(new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
-				new FillResolutionPolicy(), this.mCamera));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.andengine.ui.IGameInterface#onLoadResources()
-	 */
-	public void onLoadResources() {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.andengine.ui.IGameInterface#onLoadScene()
-	 */
-	public Scene onLoadScene() {
-		this.mEngine.registerUpdateHandler(new FPSLogger());
-
-		final Scene scene = new Scene();
-		try {
-			final TMXLoader tmxLoader = new TMXLoader(this.getAssets(),
-					this.mEngine.getTextureManager(),
-					TextureOptions.BILINEAR_PREMULTIPLYALPHA,
-                    this.getVertexBufferObjectManager(),
-					new ITMXTilePropertiesListener() {
-						public void onTMXTileWithPropertiesCreated(
-								TMXTiledMap pTMXTiledMap,
-								TMXLayer pTMXLayer,
-								TMXTile pTMXTile,
-								TMXProperties<TMXTileProperty> pTMXTileProperties) {
-							if (pTMXTileProperties.containsTMXProperty(
-									"barrier", "true")) {
-								barriers[barrierPtr++] = pTMXTile.getTileRow()
-										* 15 + pTMXTile.getTileColumn();
-								if (mBarrierGID < 0) {
-									mBarrierGID = pTMXTile.getGlobalTileID();
-								}
-							}
-						}
-
-					});
-			this.mWAVTMXMap = tmxLoader.loadFromAsset(
-					"gfx/WAV/WAVMap.tmx");
-		} catch (final TMXLoadException e) {
-			Debug.e(e);
-		}
-		tmxLayer = this.mWAVTMXMap.getTMXLayers().get(0);
-		scene.getFirstChild().attachChild(tmxLayer);
-		scene.setOnSceneTouchListener(new IOnSceneTouchListener() {
-
-			public boolean onSceneTouchEvent(Scene pScene,
-					TouchEvent pSceneTouchEvent) {
-				switch (pSceneTouchEvent.getAction()) {
-				case TouchEvent.ACTION_DOWN:
-					tmxTile = tmxLayer.getTMXTileAt(pSceneTouchEvent.getX(),
-							pSceneTouchEvent.getY());
-					if ((tmxTile != null)
-							&& tmxTile.getGlobalTileID() == mOpenBarrierGID) {
-						tmxTile.setGlobalTileID(mWAVTMXMap, mBarrierGID);
-					}
-					break;
-				}
-				return true;
-			}
-		});
-		
-		mHandler.postDelayed(openBarrier, gen.nextInt(2000));
-		return scene;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.andengine.ui.IGameInterface#onLoadComplete()
-	 */
-	public void onLoadComplete() {
-		
-	}
-	
 	private Runnable openBarrier = new Runnable() {
 		
 		public void run() {
@@ -159,21 +68,72 @@ public class WAVAcitivity extends BaseGameActivity {
 
     @Override
     public EngineOptions onCreateEngineOptions() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        mHandler = new Handler();
+        gen = new Random();
+        this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+
+        return new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
+                new FillResolutionPolicy(), this.mCamera);
     }
 
     @Override
-    public void onCreateResources(OnCreateResourcesCallback pOnCreateResourcesCallback) throws Exception {
+    protected void onCreateResources() {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws Exception {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+    protected Scene onCreateScene() {
+        this.mEngine.registerUpdateHandler(new FPSLogger());
 
-    @Override
-    public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
-        //To change body of implemented methods use File | Settings | File Templates.
+        final Scene scene = new Scene();
+        try {
+            final TMXLoader tmxLoader = new TMXLoader(this.getAssets(),
+                    this.mEngine.getTextureManager(),
+                    TextureOptions.BILINEAR_PREMULTIPLYALPHA,
+                    this.getVertexBufferObjectManager(),
+                    new ITMXTilePropertiesListener() {
+                        public void onTMXTileWithPropertiesCreated(
+                                TMXTiledMap pTMXTiledMap,
+                                TMXLayer pTMXLayer,
+                                TMXTile pTMXTile,
+                                TMXProperties<TMXTileProperty> pTMXTileProperties) {
+                            if (pTMXTileProperties.containsTMXProperty(
+                                    "barrier", "true")) {
+                                barriers[barrierPtr++] = pTMXTile.getTileRow()
+                                        * 15 + pTMXTile.getTileColumn();
+                                if (mBarrierGID < 0) {
+                                    mBarrierGID = pTMXTile.getGlobalTileID();
+                                }
+                            }
+                        }
+
+                    });
+            this.mWAVTMXMap = tmxLoader.loadFromAsset(
+                    "gfx/WAV/WAVMap.tmx");
+        } catch (final TMXLoadException e) {
+            Debug.e(e);
+        }
+        tmxLayer = this.mWAVTMXMap.getTMXLayers().get(0);
+        scene.getFirstChild().attachChild(tmxLayer);
+        scene.setOnSceneTouchListener(new IOnSceneTouchListener() {
+
+            public boolean onSceneTouchEvent(Scene pScene,
+                                             TouchEvent pSceneTouchEvent) {
+                switch (pSceneTouchEvent.getAction()) {
+                    case TouchEvent.ACTION_DOWN:
+                        tmxTile = tmxLayer.getTMXTileAt(pSceneTouchEvent.getX(),
+                                pSceneTouchEvent.getY());
+                        if ((tmxTile != null)
+                                && tmxTile.getGlobalTileID() == mOpenBarrierGID) {
+                            tmxTile.setGlobalTileID(mWAVTMXMap, mBarrierGID);
+                        }
+                        break;
+                }
+                return true;
+            }
+        });
+
+        mHandler.postDelayed(openBarrier, gen.nextInt(2000));
+        return scene;
     }
 }

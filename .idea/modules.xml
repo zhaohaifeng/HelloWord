@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../AndEngine/AndEngine.iml" filepath="$PROJECT_DIR$/../AndEngine/AndEngine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../AndEnginePhysicsBox2DExtension/AndEnginePhysicsBox2DExtension.iml" filepath="$PROJECT_DIR$/../AndEnginePhysicsBox2DExtension/AndEnginePhysicsBox2DExtension.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../AndEngineTMXTiledMapExtension/AndEngineTMXTiledMapExtension.iml" filepath="$PROJECT_DIR$/../AndEngineTMXTiledMapExtension/AndEngineTMXTiledMapExtension.iml" />
       <module fileurl="file://$PROJECT_DIR$/android.iml" filepath="$PROJECT_DIR$/android.iml" />
     </modules>
   </component>

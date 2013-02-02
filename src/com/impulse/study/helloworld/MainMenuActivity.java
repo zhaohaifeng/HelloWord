@@ -35,6 +35,8 @@ import android.widget.Toast;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.color.Color;
 
+import java.security.KeyStore;
+
 public class MainMenuActivity extends SimpleBaseGameActivity implements
         IOnMenuItemClickListener {
     private static final int CAMERA_WIDTH = 480;
@@ -46,6 +48,7 @@ public class MainMenuActivity extends SimpleBaseGameActivity implements
     protected static final int MENU_SCORES = MENU_PLAY + 1;
     protected static final int MENU_OPTIONS = MENU_SCORES + 1;
     protected static final int MENU_HELP = MENU_OPTIONS + 1;
+    protected static final int MENU_DEMO = MENU_HELP + 1;
 
     protected Camera mCamera;
     protected Scene mMainScene;
@@ -197,6 +200,9 @@ public class MainMenuActivity extends SimpleBaseGameActivity implements
             case MENU_HELP:
                 showToast("Help selected");
                 return true;
+            case MENU_DEMO:
+                mHandler.post(mLaunchDemolitionTask);
+                return true;
             default:
                 return false;
         }
@@ -230,6 +236,13 @@ public class MainMenuActivity extends SimpleBaseGameActivity implements
         helpMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
                 GL10.GL_ONE_MINUS_SRC_ALPHA);
         this.mStaticMenuScene.addMenuItem(helpMenuItem);
+
+        final IMenuItem demolitionMenuItem = new ColorMenuItemDecorator(
+                new TextMenuItem(MENU_DEMO, mFont, "demo", getVertexBufferObjectManager()), new Color(0.5f, 0.5f, 0.5f),
+                new Color(1.5f, 0.0f, 0.0f));
+        demolitionMenuItem.setBlendFunction(GL10.GL_SRC_ALPHA,
+                GL10.GL_ONE_MINUS_SRC_ALPHA);
+        this.mStaticMenuScene.addMenuItem(demolitionMenuItem);
 
         this.mStaticMenuScene.buildAnimations();
 
@@ -272,6 +285,14 @@ public class MainMenuActivity extends SimpleBaseGameActivity implements
 
         public void run() {
             Intent myIntent = new Intent(MainMenuActivity.this, OptionsActivity.class);
+            MainMenuActivity.this.startActivity(myIntent);
+        }
+    };
+
+    private Runnable mLaunchDemolitionTask = new Runnable() {
+        @Override
+        public void run() {
+            Intent myIntent = new Intent(MainMenuActivity.this, Demolition.class);
             MainMenuActivity.this.startActivity(myIntent);
         }
     };

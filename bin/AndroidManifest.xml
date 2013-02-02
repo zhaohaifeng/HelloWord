@@ -1,0 +1,52 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.impulse.study.helloworld"
+          android:versionCode="1"
+          android:versionName="1.0">
+
+    <uses-sdk
+            android:minSdkVersion="8"
+            android:targetSdkVersion="15"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <application
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
+        <activity
+                android:name=".StartActivity"
+                android:label="@string/title_activity_main"
+                android:configChanges="keyboardHidden|orientation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+        </activity>
+        <activity
+                android:name=".MainMenuActivity"
+                android:label="@string/title_activity_main_menu"
+                android:configChanges="keyboardHidden|orientation">
+
+        </activity>
+        <activity
+                android:name=".Level1Activity"
+                android:label="@string/title_activity_main_menu"
+                android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+                android:name=".OptionsActivity"
+                android:label="@string/title_activity_main_menu"
+                android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
+                android:name=".WAVAcitivity"
+                android:label="@string/title_activity_main_menu">
+        </activity>
+        <activity
+                android:name=".Demolition"
+                android:label="@string/title_activity_main_menu">
+        </activity>
+    </application>
+
+</manifest>

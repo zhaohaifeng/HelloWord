@@ -4,6 +4,9 @@
     <option name="DEFAULT_COMPILER" value="Javac" />
     <excludeFromCompile>
       <directory url="file://$PROJECT_DIR$/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/../AndEngine/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/../AndEngineTMXTiledMapExtension/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/../AndEnginePhysicsBox2DExtension/gen" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>

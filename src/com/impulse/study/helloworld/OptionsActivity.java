@@ -101,8 +101,9 @@ public class OptionsActivity extends SimpleBaseGameActivity implements
 				StartActivity.mMusic.resume();
 			}
 			audioEditor.commit();
+            this.mOptionsMenuScene.clearChildScene();
 			createOptionsMenuScene();
-			mMainScene.clearChildScene();
+
 			mMainScene.setChildScene(mOptionsMenuScene);
 			return true;
 		case MENU_EFFECTS:
@@ -112,8 +113,9 @@ public class OptionsActivity extends SimpleBaseGameActivity implements
 				audioEditor.putBoolean("effectsOn", true);
 			}
 			audioEditor.commit();
+            this.mOptionsMenuScene.clearChildScene();
 			createOptionsMenuScene();
-			mMainScene.clearChildScene();
+
 			mMainScene.setChildScene(mOptionsMenuScene);
 			return true;
 		case MENU_WAV:
@@ -130,8 +132,18 @@ public class OptionsActivity extends SimpleBaseGameActivity implements
 
 	protected void createOptionsMenuScene() {
 		this.mOptionsMenuScene = new MenuScene(this.mCamera);
+        if (musicMenuItem != null) {
+            musicMenuItem.setParent(null);
+        }
+        if (effectsMenuItem != null) {
 
-		if (audioOptions.getBoolean("musicOn", true)) {
+            effectsMenuItem.setParent(null);
+        }
+        if (WAVMenuItem != null) {
+
+            WAVMenuItem.setParent(null);
+        }
+        if (audioOptions.getBoolean("musicOn", true)) {
 			musicMenuItem = new ColorMenuItemDecorator(mTurnMusicOff, new Color(0.5f,
 					0.5f, 0.5f),new org.andengine.util.color.Color( 1.0f, 0.0f, 0.0f));
 		} else {

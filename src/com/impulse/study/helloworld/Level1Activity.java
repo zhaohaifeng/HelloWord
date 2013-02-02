@@ -36,6 +36,7 @@ import org.andengine.entity.particle.initializer.AlphaParticleInitializer;
 import org.andengine.entity.particle.initializer.ColorParticleInitializer;
 import org.andengine.entity.particle.initializer.RotationParticleInitializer;
 import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
+import org.andengine.entity.particle.modifier.ExpireParticleInitializer;
 import org.andengine.entity.particle.modifier.OffCameraExpireParticleModifier;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.AnimatedSprite;
@@ -178,6 +179,7 @@ public class Level1Activity extends SimpleBaseGameActivity {
 			particleSystem.setParticlesSpawnEnabled(false);
 		}
 	};
+    private SequenceEntityModifier pEntityModifier;
 
     @Override
     public EngineOptions onCreateEngineOptions() {
@@ -348,13 +350,18 @@ public class Level1Activity extends SimpleBaseGameActivity {
             }
         };
 
+////        hatchet.registerEntityModifier(pEntityModifier);
+//        hatchet.registerEntityModifier(new AlphaModifier(15f, 0.0f, 1.0f));
+//        scene.attachChild(hatchet);
+//        scene.registerEntityModifier(new AlphaModifier(10, 0.0f, 1.0f));
+
         hatchet.registerEntityModifier(new SequenceEntityModifier(
                 new ParallelEntityModifier(new MoveYModifier(5, 0.0f,
                         CAMERA_HEIGHT - 100.0f, EaseQuadOut.getInstance()),
                         new AlphaModifier(5, 0.0f, 1.0f), new ScaleModifier(5,
                         0.5f, 1.0f)), new RotationModifier(2, 0, 360)));
         // hatchet.registerEntityModifier(new AlphaModifier(15f, 0.0f, 1.0f));
-        scene.attachChild(hatchet);
+        scene.getLastChild().attachChild(hatchet);
         scene.registerEntityModifier(new AlphaModifier(10, 0.0f, 1.0f));
 
         // 注册触摸事件
@@ -367,14 +374,15 @@ public class Level1Activity extends SimpleBaseGameActivity {
         mHandler.postDelayed(mStartVamp, 5000);
         particleEmitter = new CircleParticleEmitter(CAMERA_WIDTH * 0.5f,
                 CAMERA_HEIGHT * 0.5f + 20, 40);
-        particleSystem = new SpriteParticleSystem(particleEmitter, 100, 100, 500,
+        particleSystem = new SpriteParticleSystem(particleEmitter, 50, 50, 300,
                 this.mParticleTextureRegion,this.getVertexBufferObjectManager());
 
         particleSystem.addParticleInitializer(new ColorParticleInitializer(1, 0, 0));
         particleSystem.addParticleInitializer(new AlphaParticleInitializer(0));
+        particleSystem.addParticleInitializer(new ExpireParticleInitializer<Sprite>(2,4));
 //		particleSystem.setBlendFunction(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
-        particleSystem.addParticleInitializer(new VelocityParticleInitializer(-2, 2,
-                -2, -2));
+//        particleSystem.addParticleInitializer(new VelocityParticleInitializer(-2, 2,
+//                -2, -2));
         particleSystem
                 .addParticleInitializer(new RotationParticleInitializer(0f, 360f));
 
@@ -393,7 +401,7 @@ public class Level1Activity extends SimpleBaseGameActivity {
         particleSystem
                 .addParticleModifier(new org.andengine.entity.particle.modifier.AlphaParticleModifier(
                         1, 0, 3, 4));
-//		particleSystem.addParticleModifier(new OffCameraExpireParticleModifier(2, 4));
+
 
         particleSystem.setParticlesSpawnEnabled(false);
         scene.attachChild(particleSystem);
